@@ -4,9 +4,13 @@ riscv-tests
 About
 -----------
 
-This repository hosts unit tests for RISC-V processors; it also contains the
-customization for the unit test of the Xpulpimg extension, subset of the Xpulp
-extension, in the context of the Snitch core used in MemPool.
+This repository hosts unit tests for RISC-V processors including the instructions of the Xpulpimg extension subsets as defined [here](https://iis-people.ee.ethz.ch/~balasr/pulp-ext/pulp.html).
+
+This repository can be used to do behavioral [Spike](https://github.com/pulp-platform/riscv-isa-sim) simulations of instructions. This allows verification of new instructions or to find out the validity of a test case.
+
+The tests can also be used for RTL simulation (outside of the scope of
+`riscv-tests`).
+
 
 Building from repository
 -----------------------------
@@ -25,6 +29,16 @@ install path, and that the riscv-gnu-toolchain package is installed.
 The rest of this document describes the format of test programs for the RISC-V
 architecture.
 
+To compile the test, we assume that you have in your `PATH` the directories for
+the binaries of `riscv-gcc`, `riscv-isa-sim` and `dtc`.
+
+    $ cd isa
+    $ make run
+
+If an error is detected in Spike simulation during any of the unit tests, the
+return value of `make run` will correspond to the `testnum` of the failed test
+in the file specified in `stdout`.
+
 Test Virtual Machines
 -------------------------
 
@@ -41,38 +55,39 @@ differences between alternative implementations by defining:
 The following table shows the TVMs currently defined for RISC-V. All of these
 TVMs only support a single hardware thread.
 
-| TVM Name                    | Description                                          |
-| --------------------------- | ---------------------------------------------------- |
-| `rv32ui`                    | RV32 user-level, integer only                        |
-| `rv32ua`                    | RV32 user-level, atomic                              |
-| `rv32uc`                    | RV32 user-level, compressed                          |
-| `rv32ud`                    | RV32 user-level, double-precision                    |
-| `rv32uf`                    | RV32 user-level, floating-point                      |
-| `rv32um`                    | RV32 user-level, integer mul/div                     |
-| `rv32uxpulpabs`             | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpbitop`           | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpbr`              | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpclip`            | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpmacsi`           | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpminmax`          | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulppostmod`         | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpslet`            | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpvect`            | RV32 user-level, Xpulp extension subset              |
-| `rv32uxpulpvectshufflepack` | RV32 user-level, Xpulp extension subset              |
-| WIP                         | add further RV32 Xpulp extension subsets             |
-| `rv32si`                    | RV32 supervisor-level, integer only                  |
-| `rv32mi`                    | RV32 machine-level, integer only                     |
-| `rv64ui`                    | RV64 user-level, integer only                        |
-| `rv64uf`                    | RV64 user-level, integer and floating-point          |
-| `rv64uv`                    | RV64 user-level, integer, floating-point, and vector |
-| `rv64ua`                    | RV64 user-level, atomic                              |
-| `rv64uc`                    | RV64 user-level, compressed                          |
-| `rv64ud`                    | RV64 user-level, double-precision                    |
-| `rv64uf`                    | RV64 user-level, floating-point                      |
-| `rv64um`                    | RV64 user-level, integer mul/div                     |
-| `rv64si`                    | RV64 supervisor-level, integer only                  |
-| `rv64sv`                    | RV64 supervisor-level, integer and vector            |
-| `rv64mi`                    | RV64 machine-level, integer only                     |
+| TVM Name                    | Description                                           |
+| --------------------------- | ------------------------------------------------------|
+| `rv32ui`                    | RV32 user-level, integer only                         |
+| `rv32ua`                    | RV32 user-level, atomic                               |
+| `rv32uc`                    | RV32 user-level, compressed                           |
+| `rv32ud`                    | RV32 user-level, double-precision                     |
+| `rv32uf`                    | RV32 user-level, floating-point                       |
+| `rv32um`                    | RV32 user-level, integer mul/div                      |
+| `rv32uxpulpabs`             | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpbitop`           | RV32 user-level, Xpulp extension subset (incomplete)  |
+| `rv32uxpulpbitopsmall`      | RV32 user-level, Xpulp extension subset (incomplete)  |
+| `rv32uxpulpbr`              | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpclip`            | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpmacsi`           | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpminmax`          | RV32 user-level, Xpulp extension subset (incomplete)  |
+| `rv32uxpulppostmod`         | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpslet`            | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpvect`            | RV32 user-level, Xpulp extension subset (incomplete)  |
+| `rv32uxpulpvectshufflepack` | RV32 user-level, Xpulp extension subset (incomplete)  |
+| WIP                         | complete and add further RV32 Xpulp extension subsets |
+| `rv32si`                    | RV32 supervisor-level, integer only                   |
+| `rv32mi`                    | RV32 machine-level, integer only                      |
+| `rv64ui`                    | RV64 user-level, integer only                         |
+| `rv64uf`                    | RV64 user-level, integer and floating-point           |
+| `rv64uv`                    | RV64 user-level, integer, floating-point, and vector  |
+| `rv64ua`                    | RV64 user-level, atomic                               |
+| `rv64uc`                    | RV64 user-level, compressed                           |
+| `rv64ud`                    | RV64 user-level, double-precision                     |
+| `rv64uf`                    | RV64 user-level, floating-point                       |
+| `rv64um`                    | RV64 user-level, integer mul/div                      |
+| `rv64si`                    | RV64 supervisor-level, integer only                   |
+| `rv64sv`                    | RV64 supervisor-level, integer and vector             |
+| `rv64mi`                    | RV64 machine-level, integer only                      |
 
 
 A test program for RISC-V is written within a single assembly language file,
